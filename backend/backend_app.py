@@ -3,8 +3,10 @@ import json
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_swagger_ui import get_swaggerui_blueprint
 
-app = Flask(__name__)
+
+app = Flask(__name__, static_url_path="/static", static_folder="../static")
 CORS(app)  # Aktiviert CORS für alle Routen
 
 DATA_FILE = "posts.json"
@@ -124,6 +126,18 @@ def search_posts():
     ]
 
     return jsonify(results), 200
+
+
+SWAGGER_URL = "/api/docs"
+API_URL = "/static/masterblog.json"  # kommt gleich!
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={"app_name": "Masterblog API"}
+)
+
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 
 if __name__ == "__main__":
