@@ -1,15 +1,28 @@
 from datetime import datetime
 import json
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
 
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
 
-app = Flask(__name__, static_url_path="/static", static_folder="../static")
+
+app = Flask(
+    __name__,
+    static_url_path="/static",
+    static_folder=os.path.join(base_dir, "static"),
+    template_folder=os.path.join(base_dir, "templates")
+)
 CORS(app)  # Aktiviert CORS für alle Routen
 
 DATA_FILE = "posts.json"
+
+
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html")
+
 
 def load_posts():
     if not os.path.exists(DATA_FILE):
