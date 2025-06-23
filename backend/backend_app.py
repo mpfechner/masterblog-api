@@ -77,6 +77,25 @@ def update_post(post_id):
     return jsonify(post), 200
 
 
+@app.route("/api/posts/search", methods=["GET"])
+def search_posts():
+    title_query = request.args.get("title", "").lower()
+    content_query = request.args.get("content", "").lower()
+    author_query = request.args.get("author", "").lower()
+    date_query = request.args.get("date", "").lower()
+    posts = load_posts()
+
+    results = [
+        post for post in posts
+        if (title_query in post.get("title", "").lower() if title_query else True) and
+           (content_query in post.get("content", "").lower() if content_query else True) and
+           (author_query in post.get("author", "").lower() if author_query else True) and
+           (date_query in post.get("date", "").lower() if date_query else True)
+    ]
+
+    return jsonify(results), 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002)
 
