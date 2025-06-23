@@ -22,6 +22,24 @@ def save_posts(posts):
 @app.route("/api/posts", methods=["GET"])
 def get_posts():
     posts = load_posts()
+
+    sort_field = request.args.get("sort")
+    direction = request.args.get("direction", "asc")
+
+    # Nur sortieren, wenn gültiges Feld übergeben wurde
+    if sort_field in {"title", "content", "author", "date"}:
+        reverse = direction == "desc"
+        try:
+            # Bei Datum optional Umwandlung für korrektes Sortieren
+            if sort_field == "date":
+                posts.sort(key=lambda p: p.get("date", ""), reverse=reverse)
+            else:
+                posts.sort(key=lambda p: p.get(sort_field, "").lower(), reverse=reverse)
+        except Exception as e:
+            return jsonify({"error": f"Sorting failed: {str(e)}"}), 400
+    elif sort_field:
+        return jsonify({"error": f"Invalid sort field: {sort_field}"}), 400
+
     return jsonify(posts), 200
 
 
