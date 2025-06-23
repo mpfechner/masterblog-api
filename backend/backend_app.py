@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 from flask import Flask, jsonify, request
@@ -47,8 +48,8 @@ def get_posts():
 def add_post():
     data = request.get_json()
 
-    if not data or "title" not in data or "content" not in data:
-        return jsonify({"error": "Missing title or content"}), 400
+    if not data or "title" not in data or "content" not in data or "author" not in data:
+        return jsonify({"error": "Missing title, content, or author"}), 400
 
     posts = load_posts()
     new_id = max((post["id"] for post in posts), default=0) + 1
@@ -56,7 +57,9 @@ def add_post():
     new_post = {
         "id": new_id,
         "title": data["title"],
-        "content": data["content"]
+        "content": data["content"],
+        "author": data["author"],
+        "date": datetime.now().strftime("%Y-%m-%d")
     }
 
     posts.append(new_post)
@@ -90,6 +93,15 @@ def update_post(post_id):
         post["title"] = data["title"]
     if "content" in data:
         post["content"] = data["content"]
+    if "author" in data:
+        post["author"] = data["author"]
+    if "date" in data:
+        try:
+            # Validierung des Datumsformats
+            datetime.strptime(data["date"], "%Y-%m-%d")
+            post["date"] = data["date"]
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
 
     save_posts(posts)
     return jsonify(post), 200
